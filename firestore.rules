@@ -17,6 +17,8 @@ service cloud.firestore {
     // but should never be writable by a client.
     match /items/{docId} {
       allow read: if true;
+      // NOTE: Items are updated via the syncGameData scheduled Cloud Function.
+      // Client writes are not allowed for security and data integrity.
       allow create, update, delete: if false;
     }
 

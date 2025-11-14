@@ -6,11 +6,12 @@
   "scripts": {
     "dev": "npm-run-all --parallel dev:frontend dev:emulators",
     "dev:frontend": "vite",
-    "dev:emulators": "set PATH=C:\\Program Files\\Eclipse Adoptium\\jdk-21.0.9.10-hotspot\\bin;%PATH% && firebase emulators:start --import=./fb-emulator-data --export-on-exit",
+    "dev:emulators": "set PATH=C:\\Program Files\\Eclipse Adoptium\\jdk-21.0.9.10-hotspot\\bin;%PATH% && npx firebase emulators:start",
+    "seed": "node scripts/seed-emulator.mjs",
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "deploy": "firebase deploy"
+    "deploy": "npx firebase deploy"
   },
   "dependencies": {
     "firebase": "^10.14.1",
@@ -29,6 +30,8 @@
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^4.6.2",
     "eslint-plugin-react-refresh": "^0.4.7",
+    "firebase-admin": "^13.6.0",
+    "firebase-tools": "^14.25.0",
     "npm-run-all": "^4.1.5",
     "typescript": "^5.2.2",
     "vite": "^5.2.0"
