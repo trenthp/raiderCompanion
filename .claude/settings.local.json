@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(export JAVA_HOME=\"C:\\Program Files/Eclipse Adoptium/jdk-21.0.9.10-hotspot\")",
+      "Bash(npm run dev:*)",
+      "Bash(taskkill:*)",
+      "Bash(nul)",
+      "Bash(timeout /T 2)",
+      "Bash(npm run dev:frontend:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
