@@ -4,11 +4,14 @@ import { firestore } from '../firebaseConfig'
 import { TrackedGoal } from '../types/userData'
 import { useAuth } from '../hooks/useAuth'
 import { useState } from 'react'
+import { ItemSelector } from '../components/ItemSelector'
+import { GameItem } from '../types/gameData'
 import styles from './PlannerPage.module.css'
 
 export const PlannerPage = () => {
   const { user } = useAuth()
-  const [newGoalName, setNewGoalName] = useState('')
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
+  const [selectedItem, setSelectedItem] = useState<GameItem | null>(null)
   const [goalType, setGoalType] = useState<'ITEM' | 'RECIPE' | 'UPGRADE'>('ITEM')
   const [goalQuantity, setGoalQuantity] = useState(10)
 
@@ -17,18 +20,24 @@ export const PlannerPage = () => {
     ? collection(firestore, 'users', user.uid, 'userTrackedGoals')
     : null
 
-  const [goals, loadingGoals, errorGoals] = useCollectionData<TrackedGoal>(
+  const [rawGoals, loadingGoals, errorGoals] = useCollectionData(
     goalsRef ? (query(goalsRef) as any) : null
   )
 
+  // Map goals to include document IDs
+  const goals = (rawGoals as any[])?.map((goal: any, index: number) => ({
+    ...goal,
+    id: goal.id || `goal-${index}`,
+  })) as TrackedGoal[] | undefined
+
   const handleAddGoal = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!goalsRef || !newGoalName) return
+    if (!goalsRef || !selectedItemId || !selectedItem) return
 
     const newGoal: Omit<TrackedGoal, 'id'> = {
       type: goalType,
-      targetId: 'stub_item_id', // TODO: Use item selector
-      targetName: newGoalName,
+      targetId: selectedItemId,
+      targetName: selectedItem.name,
       targetQuantity: goalQuantity,
       currentQuantity: 0,
       createdAt: new Date().toISOString(),
@@ -37,11 +46,17 @@ export const PlannerPage = () => {
 
     try {
       await addDoc(goalsRef, newGoal)
-      setNewGoalName('')
+      setSelectedItemId(null)
+      setSelectedItem(null)
       setGoalQuantity(10)
     } catch (err) {
       console.error('Error adding goal:', err)
     }
+  }
+
+  const handleItemSelect = (itemId: string, item: GameItem) => {
+    setSelectedItemId(itemId)
+    setSelectedItem(item)
   }
 
   const handleDeleteGoal = async (goalId: string) => {
@@ -70,33 +85,58 @@ export const PlannerPage = () => {
         <>
           <form onSubmit={handleAddGoal} className={styles.form}>
             <h2>Add New Goal</h2>
-            <input
-              type="text"
-              value={newGoalName}
-              onChange={(e) => setNewGoalName(e.target.value)}
-              placeholder="Goal name (e.g., 'Craft Anvil')"
-              required
+
+            <ItemSelector
+              value={selectedItemId}
+              onChange={handleItemSelect}
+              label="Select Item to Track"
             />
 
-            <select
-              value={goalType}
-              onChange={(e) => setGoalType(e.target.value as 'ITEM' | 'RECIPE' | 'UPGRADE')}
+            {selectedItem && (
+              <div className={styles.itemPreview}>
+                <img src={selectedItem.iconUrl} alt={selectedItem.name} className={styles.previewIcon} />
+                <div className={styles.previewInfo}>
+                  <div className={styles.previewName}>{selectedItem.name}</div>
+                  <div className={styles.previewDetails}>
+                    {selectedItem.type} • {selectedItem.rarity}
+                    {selectedItem.sellValue && ` • Sell: 💰${selectedItem.sellValue}`}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className={styles.formRow}>
+              <div className={styles.formGroup}>
+                <label>Goal Type</label>
+                <select
+                  value={goalType}
+                  onChange={(e) => setGoalType(e.target.value as 'ITEM' | 'RECIPE' | 'UPGRADE')}
+                >
+                  <option value="ITEM">Obtain Item</option>
+                  <option value="RECIPE">Learn Recipe</option>
+                  <option value="UPGRADE">Complete Upgrade</option>
+                </select>
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>Target Quantity</label>
+                <input
+                  type="number"
+                  value={goalQuantity}
+                  onChange={(e) => setGoalQuantity(parseInt(e.target.value) || 1)}
+                  min="1"
+                  required
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className={styles.submitButton}
+              disabled={!selectedItem}
             >
-              <option value="ITEM">Item</option>
-              <option value="RECIPE">Recipe</option>
-              <option value="UPGRADE">Upgrade</option>
-            </select>
-
-            <input
-              type="number"
-              value={goalQuantity}
-              onChange={(e) => setGoalQuantity(parseInt(e.target.value))}
-              placeholder="Quantity"
-              min="1"
-              required
-            />
-
-            <button type="submit">Add Goal</button>
+              Add Goal ✓
+            </button>
           </form>
 
           <div className={styles.goalsSection}>

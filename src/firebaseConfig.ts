@@ -23,16 +23,19 @@ const firestore = getFirestore(app)
 const functions = getFunctions(app)
 const googleProvider = new GoogleAuthProvider()
 
-// Connect to local emulators if in development mode
+// Note: Emulators can be started with `npm run dev:emulators`
+// To enable emulator connection, uncomment below:
+/*
 if (import.meta.env.DEV) {
   try {
-    connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true })
-    connectFirestoreEmulator(firestore, 'localhost', 8080)
-    connectFunctionsEmulator(functions, 'localhost', 5001)
+    connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true })
+    connectFirestoreEmulator(firestore, '127.0.0.1', 8080)
+    connectFunctionsEmulator(functions, '127.0.0.1', 5001)
     console.log('✓ Connected to Firebase Emulators')
   } catch (error) {
-    // Emulators already initialized
+    console.log('✓ Using production Firebase')
   }
 }
+*/
 
 export { app, auth, firestore, functions, googleProvider }

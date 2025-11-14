@@ -23,9 +23,9 @@ jobs:
 
       - name: Sync game data to Firestore
         env:
-          FIREBASE_PROJECT_ID: ${{ secrets.PROJECT_ID }}
-          FIREBASE_PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-          FIREBASE_CLIENT_EMAIL: ${{ secrets.CLIENT_EMAIL }}
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
+          FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
         run: |
           echo "Checking environment variables..."
           [ -z "$FIREBASE_PROJECT_ID" ] && echo "ERROR: FIREBASE_PROJECT_ID not set" && exit 1

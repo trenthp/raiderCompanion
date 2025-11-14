@@ -6,7 +6,8 @@
       "Bash(taskkill:*)",
       "Bash(nul)",
       "Bash(timeout /T 2)",
-      "Bash(npm run dev:frontend:*)"
+      "Bash(npm run dev:frontend:*)",
+      "Bash(pkill:*)"
     ],
     "deny": [],
     "ask": []

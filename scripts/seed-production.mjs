@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 
-import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, doc, setDoc, query, limit, getDocs, connectFirestoreEmulator } from 'firebase/firestore';
+import { initializeApp, cert } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
+import fs from 'fs';
+import path from 'path';
 
 const SAMPLE_ITEMS = [
   {
@@ -162,71 +164,75 @@ const SAMPLE_ITEMS = [
   },
 ];
 
-async function waitForEmulator(maxAttempts = 30) {
-  const firebaseConfig = { projectId: 'raidercompanion' };
-  const app = initializeApp(firebaseConfig, { name: 'checker' });
-  const db = getFirestore(app);
-  
-  // Connect explicitly to 127.0.0.1 (IPv4)
-  connectFirestoreEmulator(db, '127.0.0.1', 8080);
-
-  for (let i = 0; i < maxAttempts; i++) {
-    try {
-      console.log(`Attempting to connect to emulator (${i + 1}/${maxAttempts})...`);
-      await getDocs(query(collection(db, '_dummy'), limit(1)));
-      console.log('✓ Emulator is ready!\n');
-      return db;
-    } catch (error) {
-      if (i < maxAttempts - 1) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
-    }
-  }
-  throw new Error('Emulator failed to start after 30 seconds');
-}
-
-async function seedEmulator() {
-  console.log('🌱 Seeding Firestore emulator with sample items...\n');
+async function seedProduction() {
+  console.log('🌱 Seeding production Firebase with sample items...\n');
 
   try {
-    // Wait for emulator to be ready
-    const db = await waitForEmulator();
+    // Try to load service account from environment or file
+    let credential;
+    
+    if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+      credential = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+      console.log('Using service account from environment variable\n');
+    } else {
+      // Try to find service account file
+      const serviceAccountPath = path.resolve('./serviceAccountKey.json');
+      if (fs.existsSync(serviceAccountPath)) {
+        credential = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
+        console.log('Using service account from serviceAccountKey.json\n');
+      } else {
+        console.error('❌ Error: No Firebase credentials found!');
+        console.error('\nTo seed production Firebase, you need to:');
+        console.error('1. Get a service account key from Firebase Console:');
+        console.error('   Project Settings > Service Accounts > Generate new private key');
+        console.error('2. Save it as serviceAccountKey.json in the project root');
+        console.error('3. Add serviceAccountKey.json to .gitignore (already done)');
+        console.error('4. Run: npm run seed:production\n');
+        process.exit(1);
+      }
+    }
+
+    const app = initializeApp({
+      credential: cert(credential),
+      projectId: 'raidercompanion',
+    });
+
+    const db = getFirestore(app);
+    console.log('Connected to production Firebase\n');
 
     // Check if items already exist
-    const itemsRef = collection(db, 'items');
-    const q = query(itemsRef, limit(1));
-    const snapshot = await getDocs(q);
+    const itemsRef = db.collection('items');
+    const snapshot = await itemsRef.limit(1).get();
 
     if (!snapshot.empty) {
-      console.log('✓ Items already seeded. Skipping.\n');
+      console.log('✓ Items already exist in production Firebase.');
+      console.log('Skipping seed to avoid duplicates.\n');
       process.exit(0);
     }
 
-    // Write items
+    // Write items in batches
+    const batch = db.batch();
     let count = 0;
-    console.log('Writing items to emulator...\n');
+
     for (const item of SAMPLE_ITEMS) {
-      const docRef = doc(itemsRef, item.id);
-      await setDoc(docRef, {
+      const docRef = itemsRef.doc(item.id);
+      batch.set(docRef, {
         ...item,
         updatedAt: new Date().toISOString(),
       });
       count++;
-      process.stdout.write(`\r✓ Seeded ${count}/${SAMPLE_ITEMS.length} items`);
     }
 
-    console.log(`\n\n✅ Successfully seeded ${count} items to emulator!\n`);
-    console.log('Items are now available at http://localhost:5173/database\n');
+    await batch.commit();
+
+    console.log(`✅ Successfully seeded ${count} items to production Firebase!\n`);
+    console.log('Items are now visible at http://localhost:5173/database\n');
 
     process.exit(0);
   } catch (error) {
-    console.error('\n❌ Error seeding emulator:', error.message);
-    console.error('\nMake sure:');
-    console.error('1. Firebase emulator is running (npm run dev:emulators)');
-    console.error('2. Port 8080 is available');
-    console.error('3. Ports are not blocked by firewall');
+    console.error('❌ Error seeding production Firebase:', error.message);
     process.exit(1);
   }
 }
 
-seedEmulator();
+seedProduction();

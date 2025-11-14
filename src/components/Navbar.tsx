@@ -27,6 +27,12 @@ export const Navbar = () => {
         <li>
           <Link to="/database">Database</Link>
         </li>
+        <li>
+          <Link to="/lookup">Item Lookup</Link>
+        </li>
+        <li>
+          <Link to="/meta">Meta</Link>
+        </li>
         {user && (
           <>
             <li>
@@ -34,6 +40,9 @@ export const Navbar = () => {
             </li>
             <li>
               <Link to="/planner">Planner</Link>
+            </li>
+            <li>
+              <Link to="/triage">Triage</Link>
             </li>
           </>
         )}

@@ -20,13 +20,25 @@ export const MyStashPage = () => {
     ? collection(firestore, 'users', user.uid, 'userStash')
     : null
 
-  const [stash, loadingStash, errorStash] = useCollectionData<UserStashItem>(
+  const [rawStash, loadingStash, errorStash] = useCollectionData<UserStashItem>(
     stashRef ? (query(stashRef) as any) : null
   )
 
+  // Map stash to include document IDs (doc ID = itemId)
+  const stash = (rawStash as any[])?.map((item: any, index: number) => ({
+    ...item,
+    id: item.id || `item-${index}`,
+  }))
+
   // Fetch all game items for OCR matching
   const itemsRef = collection(firestore, 'items')
-  const [gameItems, loadingItems] = useCollectionData<GameItem>(query(itemsRef) as any)
+  const [rawGameItems, loadingItems] = useCollectionData<GameItem>(query(itemsRef) as any)
+
+  // Map game items to include document IDs
+  const gameItems = (rawGameItems as any[])?.map((item: any, index: number) => ({
+    ...item,
+    id: item.id || `item-${index}`,
+  }))
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -181,8 +193,8 @@ export const MyStashPage = () => {
                 <h2>Items ({stash.length})</h2>
                 <ul className={styles.itemList}>
                   {stash.map((item: any) => (
-                    <li key={item.itemId} className={styles.stashItem}>
-                      <strong>Item ID: {item.itemId}</strong>
+                    <li key={item.id} className={styles.stashItem}>
+                      <strong>Item ID: {item.id}</strong>
                       <span className={styles.quantity}>x{item.quantity}</span>
                     </li>
                   ))}

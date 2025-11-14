@@ -4,6 +4,9 @@ import { DatabasePage } from './pages/DatabasePage'
 import { MyStashPage } from './pages/MyStashPage'
 import { PlannerPage } from './pages/PlannerPage'
 import { LoadoutsPage } from './pages/LoadoutsPage'
+import { ItemLookupPage } from './pages/ItemLookupPage'
+import { TriagePage } from './pages/TriagePage'
+import { MetaDashboardPage } from './pages/MetaDashboardPage'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AuthProvider } from './hooks/useAuth'
 import { Navbar } from './components/Navbar'
@@ -53,6 +56,22 @@ export const appRouter = createBrowserRouter([
       {
         path: '/loadouts',
         element: <LoadoutsPage />,
+      },
+      {
+        path: '/lookup',
+        element: <ItemLookupPage />,
+      },
+      {
+        path: '/triage',
+        element: (
+          <ProtectedRoute>
+            <TriagePage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/meta',
+        element: <MetaDashboardPage />,
       },
     ],
   },

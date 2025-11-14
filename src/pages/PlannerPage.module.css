@@ -23,16 +23,73 @@
   margin-top: 0;
 }
 
+.itemPreview {
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  background: rgba(233, 69, 96, 0.1);
+  border: 1px solid rgba(233, 69, 96, 0.3);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.previewIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 4px;
+  object-fit: cover;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.previewInfo {
+  flex: 1;
+}
+
+.previewName {
+  font-weight: 600;
+  color: #fff;
+  font-size: 1rem;
+}
+
+.previewDetails {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 0.25rem;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.formGroup label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
 .form input,
 .form select {
-  width: 100%;
   padding: 0.75rem;
-  margin-bottom: 1rem;
   border: 1px solid #e94560;
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.1);
   color: #fff;
   font-size: 1rem;
+}
+
+.formRow .form input,
+.formRow .form select {
+  width: 100%;
 }
 
 .form input::placeholder {
@@ -46,7 +103,7 @@
   box-shadow: 0 0 8px rgba(233, 69, 96, 0.5);
 }
 
-.form button {
+.submitButton {
   width: 100%;
   background: #e94560;
   color: white;
@@ -59,8 +116,14 @@
   transition: background 0.3s;
 }
 
-.form button:hover {
+.submitButton:hover:not(:disabled) {
   background: #ff6b7a;
+}
+
+.submitButton:disabled {
+  background: #666;
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .goalsSection {
