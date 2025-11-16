@@ -22,3 +22,16 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Firebase
+.runtimeconfig.json
+.firebase
+firebase-debug.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Emulator data (optional - remove if you want to commit emulator snapshots)
+fb-emulator-data/

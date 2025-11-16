@@ -1,0 +1,115 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // --- Helper Functions ---
+    // Checks if the requesting user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    // Checks if the requesting user's UID matches the requested document's owner UID
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    // --- Tier 1: Top-Level Static Collections (Public, Read-Only) ---
+    // These collections contain master game data. They are readable by everyone
+    // but should never be writable by a client.
+    match /items/{docId} {
+      allow read: if true;
+      // NOTE: Items are updated via the syncGameData scheduled Cloud Function.
+      // Client writes are not allowed for security and data integrity.
+      allow create, update, delete: if false;
+    }
+
+    match /recipes/{docId} {
+      allow read: if true;
+      allow create, update, delete: if false;
+    }
+
+    match /quests/{docId} {
+      allow read: if true;
+      allow create, update, delete: if false;
+    }
+
+    match /workshopUpgrades/{docId} {
+      allow read: if true;
+      allow create, update, delete: if false;
+    }
+
+    match /projects/{docId} {
+      allow read: if true;
+      allow create, update, delete: if false;
+    }
+
+    match /enemyLootTables/{docId} {
+      allow read: if true;
+      allow create, update, delete: if false;
+    }
+
+    // Tier 1 (Special Case): Live Event Timers
+    // This collection is readable by everyone but is ONLY writable by a backend
+    // function using the Admin SDK. This is critical as event schedules
+    // are volatile and change frequently.
+    match /liveEventTimers/{timerId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // --- Tier 2: Top-Level Community Collections (Public, Write w/ Auth) ---
+    // These collections are readable by everyone, but only authenticated
+    // users can create new content. Users can only edit or delete their *own* content.
+
+    match /communityLoadouts/{loadoutId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && request.resource.data.authorId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.authorId == request.auth.uid;
+    }
+
+    match /communityComments/{commentId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && request.resource.data.authorId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.authorId == request.auth.uid;
+    }
+
+    // --- Tier 3: Core User Data (Private, Owner-Only Access) ---
+    // This is the most restrictive ruleset, protecting all user-specific data.
+
+    match /users/{userId} {
+      // The top-level user document (public profile) is readable by everyone
+      // but only writable by the owner.
+      allow read: if true;
+      allow write: if isOwner(userId);
+
+      // All private sub-collections nested under a user.
+      match /userStash/{stashId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      match /userLearnedBlueprints/{blueprintId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      match /userTrackedGoals/{goalId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      match /userLoadouts/{loadoutId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      // OCR corrections dataset: user provides feedback on unrecognized items
+      match /ocrCorrections/{correctionId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    // --- Meta-Stats Collection (Read-Only for Clients) ---
+    // This document is written to by the `aggregateMetaStats` scheduled function
+    // and read by all clients for the meta dashboard.
+    match /metaStats/dashboard {
+      allow read: if true;
+      allow write: if false;
+    }
+  }
+}

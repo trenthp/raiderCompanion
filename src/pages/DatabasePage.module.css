@@ -1,0 +1,135 @@
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.container h1 {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #e94560;
+}
+
+.controls {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.searchInput,
+.raritySelect {
+  flex: 1;
+  min-width: 200px;
+  padding: 0.75rem;
+  border: 1px solid #e94560;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 1rem;
+}
+
+.searchInput::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.searchInput:focus,
+.raritySelect:focus {
+  outline: none;
+  border-color: #ff6b7a;
+  box-shadow: 0 0 8px rgba(233, 69, 96, 0.5);
+}
+
+.loading,
+.error,
+.noResults {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.1rem;
+}
+
+.error {
+  color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.1);
+  border-radius: 6px;
+}
+
+.itemList {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.item {
+  padding: 1.5rem;
+  border-radius: 8px;
+  border-left: 4px solid #e94560;
+  background: linear-gradient(135deg, rgba(26, 26, 46, 0.8), rgba(22, 33, 62, 0.8));
+  transition: transform 0.3s, box-shadow 0.3s;
+  cursor: pointer;
+}
+
+.item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(233, 69, 96, 0.3);
+}
+
+.item.Common {
+  border-left-color: #999;
+}
+
+.item.Uncommon {
+  border-left-color: #00ff00;
+}
+
+.item.Rare {
+  border-left-color: #0099ff;
+}
+
+.item.Epic {
+  border-left-color: #9900ff;
+}
+
+.item.Legendary {
+  border-left-color: #ffaa00;
+}
+
+.item.Junk {
+  border-left-color: #666;
+}
+
+.itemHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.itemHeader strong {
+  font-size: 1.1rem;
+  color: #fff;
+}
+
+.rarity {
+  font-size: 0.85rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  background: rgba(233, 69, 96, 0.2);
+  color: #e94560;
+  font-weight: 600;
+}
+
+.description {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
+}
+
+.itemMeta {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+}
